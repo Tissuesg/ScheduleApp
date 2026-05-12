@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+      background: #fafafa;
+      border-left: 4px solid #888;
+    }
+
+    .time {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .participants {
+      margin-top: 6px;
+      color: #444;
+    }
+
+    .location {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .memo {
+      margin-top: 4px;
+      font-size: 13px;
+      color: #555;
+    }
+
+    @media print {
+      body {
+        background: white;
+        margin: 0;
+      }
+
+      .toolbar {
+        display: none;
+      }
+
+      .day-card {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button>前週</button>
+  <button>今週</button>
+  <button>次週</button>
+  <button>新規登録</button>
+  <button onclick="window.print()">印刷</button>
+</div>
+
+<div class="week-container">
+
+  <div class="day-card">
+    <div class="day-title">5月11日（月）</div>
+
+    <div class="event">
+      <div class="time">09:00〜10:00</div>
+      <div>幹部会議</div>
+      <div class="location">場所：大会議室</div>
+      <div class="participants">参加：専務理事 / 事務局長 / 医監</div>
+      <div class="memo">資料持参</div>
+    </div>
+
+    <div class="event">
+      <div class="time">14:00〜</div>
+      <div>来客対応</div>
+      <div class="location">場所：応接室</div>
+      <div class="participants">参加：専務理事</div>
+    </div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-title">5月12日（火）</div>
+
+    <div class="event">
+      <div class="time">終日</div>
+      <div>県外出張</div>
+      <div class="participants">参加：環境部長</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

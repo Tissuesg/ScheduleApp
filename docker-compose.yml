@@ -1,0 +1,28 @@
+# 幹部スケジュール管理システム — Docker Compose
+#
+# 起動: docker compose up --build
+# 停止: docker compose down
+#
+# ポート変更方法:
+#   フロントエンド: ports の左側を変更（例: "4000:3000"）
+#   バックエンド:   ports の左側を変更（例: "9000:8000"）
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  data:

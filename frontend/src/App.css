@@ -1,0 +1,835 @@
+/**
+ * 幹部スケジュール管理システム — スタイルシート
+ *
+ * デザイン方針（仕様書 §8）:
+ *   - シンプル・白背景ベース・Excelライク
+ *   - 印刷重視・情報量優先
+ *   - 将来的にWeb画面の見た目改善にも対応可能な構造
+ */
+
+/* =====================================================================
+   1. リセット & 基本設定
+   ===================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Meiryo", "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN",
+    "Yu Gothic", "游ゴシック", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  background: #f0f2f5;
+}
+
+/* =====================================================================
+   2. アプリ全体
+   ===================================================================== */
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* =====================================================================
+   2.5. ページ見出し
+   ===================================================================== */
+
+.app-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.app-main-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #1e293b;
+  letter-spacing: 0.5px;
+}
+
+.filter-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+/* =====================================================================
+   3. ツールバー
+   ===================================================================== */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  flex-wrap: wrap;
+}
+
+.toolbar-nav {
+  display: flex;
+  gap: 6px;
+}
+
+.toolbar-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+  white-space: nowrap;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* =====================================================================
+   4. ボタン
+   ===================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn:hover {
+  background: #f5f5f5;
+  border-color: #aaa;
+}
+
+.btn:active {
+  background: #eee;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+.btn-print {
+  background: #fefce8;
+  border-color: #ca8a04;
+  color: #854d0e;
+}
+
+.btn-print:hover {
+  background: #fef9c3;
+}
+
+.btn-cancel {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #6b7280;
+}
+
+.btn-cancel:hover {
+  background: #f3f4f6;
+}
+
+.btn-nav {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.15s;
+}
+
+.btn-icon:hover {
+  background: #f3f4f6;
+  border-color: #ddd;
+}
+
+.btn-add-event {
+  font-size: 16px;
+  font-weight: bold;
+  color: #2563eb;
+}
+
+/* =====================================================================
+   4.5. 参加者フィルタ
+   ===================================================================== */
+
+.filter-select {
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  color: #374151;
+  background: #fff;
+  cursor: pointer;
+  min-width: 120px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* =====================================================================
+   5. 週間表示
+   ===================================================================== */
+
+.week-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* =====================================================================
+   6. 日別カード
+   ===================================================================== */
+
+.day-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px 16px;
+  transition: box-shadow 0.15s;
+}
+
+.day-card:hover {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.day-card-today {
+  border-left: 4px solid #2563eb;
+  background: #fafbff;
+}
+
+.day-card-weekend {
+  background: #fafafa;
+}
+
+.day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.day-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.text-sunday {
+  color: #dc2626;
+}
+
+.text-saturday {
+  color: #2563eb;
+}
+
+.day-empty {
+  color: #9ca3af;
+  font-size: 13px;
+  padding: 4px 0;
+}
+
+/* =====================================================================
+   7. 休暇ステータスバッジ
+   ===================================================================== */
+
+.day-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.status-nenkyuu {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.status-shutchou {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.status-byoukyuu {
+  background: #fce7f3;
+  color: #9d174d;
+  border: 1px solid #f9a8d4;
+}
+
+.status-amkyuu {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.status-pmkyuu {
+  background: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #a5b4fc;
+}
+
+.status-default {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.status-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin-left: 2px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  color: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.status-delete-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* =====================================================================
+   8. イベント
+   ===================================================================== */
+
+.day-events {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.event {
+  padding: 8px 10px;
+  background: #fafafa;
+  border-left: 3px solid #6b7280;
+  border-radius: 0 4px 4px 0;
+  transition: background 0.1s;
+}
+
+.event:hover {
+  background: #f3f4f6;
+}
+
+.event-allday {
+  border-left-color: #2563eb;
+  background: #eff6ff;
+}
+
+.event-allday:hover {
+  background: #dbeafe;
+}
+
+.event-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.event-time {
+  font-weight: bold;
+  font-size: 13px;
+  color: #1f2937;
+  white-space: nowrap;
+  min-width: 100px;
+}
+
+.event-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #111827;
+  flex: 1;
+}
+
+.event-actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.event:hover .event-actions {
+  opacity: 1;
+}
+
+.event-location {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.event-participants {
+  font-size: 13px;
+  color: #4b5563;
+  margin-top: 2px;
+}
+
+.event-memo {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* =====================================================================
+   9. モーダル
+   ===================================================================== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-small {
+  max-width: 400px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #1f2937;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* =====================================================================
+   10. フォーム
+   ===================================================================== */
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="datetime-local"],
+.form-group input[type="date"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  color: #1f2937;
+  background: #fff;
+  transition: border-color 0.15s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.checkbox-label {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  font-weight: normal !important;
+  cursor: pointer;
+}
+
+.participant-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 8px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+}
+
+.participant-checkbox {
+  font-size: 13px;
+}
+
+/* =====================================================================
+   11. エラー & ローディング
+   ===================================================================== */
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  color: #991b1b;
+  font-size: 14px;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 16px;
+  color: #6b7280;
+}
+
+/* =====================================================================
+   12. 週間メモ欄
+   ===================================================================== */
+
+.week-memo {
+  margin-top: 12px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px 16px;
+}
+
+.week-memo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.week-memo-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: #374151;
+}
+
+.memo-saving-indicator {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.week-memo-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  color: #1f2937;
+  background: #fafafa;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 0.15s;
+}
+
+.week-memo-textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* =====================================================================
+   13. 印刷用フッター（画面では非表示）
+   ===================================================================== */
+
+.print-footer {
+  display: none;
+}
+
+/* =====================================================================
+   13. 印刷スタイル — 最重要（仕様書 §6-4）
+   A4縦固定・1週間1ページ・余白調整・ツールバー非表示
+   ===================================================================== */
+
+@media print {
+  /* ページ設定 */
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+
+  /* 基本リセット */
+  html, body {
+    background: white !important;
+    color: #000 !important;
+    font-size: 10px !important;
+    line-height: 1.35 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .app {
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* ページ見出し（印刷時） */
+  .app-header {
+    margin-bottom: 6px;
+    padding: 0;
+  }
+
+  .app-main-title {
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .filter-label {
+    font-size: 12px;
+    color: #000;
+  }
+
+  /* ツールバー非表示 */
+  .toolbar {
+    display: none !important;
+  }
+
+  /* 操作ボタン非表示 */
+  .no-print,
+  .event-actions,
+  .btn-add-event,
+  .status-delete-btn {
+    display: none !important;
+  }
+
+  /* 週コンテナ */
+  .week-container {
+    gap: 3px;
+  }
+
+  /* 日別カード */
+  .day-card {
+    border: 1px solid #999;
+    border-radius: 0;
+    padding: 4px 8px;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+
+  .day-card-today {
+    border-left: 3px solid #000;
+  }
+
+  .day-card-weekend {
+    background: #f5f5f5 !important;
+  }
+
+  .day-header {
+    margin-bottom: 3px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #999;
+  }
+
+  .day-title {
+    font-size: 11px;
+  }
+
+  .day-empty {
+    font-size: 9px;
+    padding: 1px 0;
+  }
+
+  /* ステータスバッジ */
+  .status-badge {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 6px;
+  }
+
+  .day-statuses {
+    gap: 3px;
+    margin-bottom: 3px;
+  }
+
+  /* イベント */
+  .event {
+    padding: 3px 6px;
+    border-left-width: 2px;
+  }
+
+  .event-header {
+    gap: 6px;
+    margin-bottom: 1px;
+  }
+
+  .event-time {
+    font-size: 10px;
+    min-width: 70px;
+  }
+
+  .event-title {
+    font-size: 10px;
+  }
+
+  .event-location,
+  .event-participants {
+    font-size: 9px;
+    margin-top: 1px;
+  }
+
+  .event-memo {
+    font-size: 9px;
+    margin-top: 1px;
+  }
+
+  .day-events {
+    gap: 2px;
+  }
+
+  /* 週間メモ（印刷時） */
+  .week-memo {
+    margin-top: 4px;
+    padding: 4px 8px;
+    border: 1px solid #999;
+    border-radius: 0;
+  }
+
+  .week-memo-title {
+    font-size: 10px;
+  }
+
+  .week-memo-textarea {
+    display: none;
+  }
+
+  /* メモ内容を印刷用に表示 */
+  .week-memo::after {
+    content: attr(data-memo-content);
+    white-space: pre-wrap;
+    font-size: 9px;
+    color: #333;
+  }
+
+  /* 印刷フッター */
+  .print-footer {
+    display: block;
+    text-align: center;
+    font-size: 8px;
+    color: #999;
+    margin-top: 8px;
+    padding-top: 4px;
+    border-top: 1px solid #ddd;
+  }
+
+  /* モーダル非表示 */
+  .modal-overlay {
+    display: none !important;
+  }
+
+  /* エラー非表示 */
+  .error-banner {
+    display: none !important;
+  }
+}
