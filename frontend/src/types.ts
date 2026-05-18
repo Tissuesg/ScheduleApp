@@ -50,20 +50,23 @@ export interface ParticipantStatus {
   participant_name: string;
   target_date: string;
   status: string;
+  note?: string;
 }
 
 /** 休暇登録用 */
 export interface StatusFormData {
   participant_id: number;
-  target_date: string;
+  start_date: string;
+  end_date: string;
   status: string;
+  note?: string;
 }
 
 /** 曜日名 */
 export const DAY_NAMES = ['日', '月', '火', '水', '木', '金', '土'];
 
 /** 休暇種別 */
-export const STATUS_TYPES = ['年休', '出張', '病休', '午前休', '午後休'];
+export const STATUS_TYPES = ['年休', '出張', '病休', '午前休', '午後休', '早退', 'その他'];
 
 /** 週間メモ */
 export interface WeekMemo {

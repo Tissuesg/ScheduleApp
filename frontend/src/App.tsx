@@ -17,6 +17,7 @@ import Toolbar from './components/Toolbar';
 import WeekView from './components/WeekView';
 import EventForm from './components/EventForm';
 import StatusForm from './components/StatusForm';
+import SettingsModal from './components/SettingsModal';
 
 // ---------------------------------------------------------------------------
 // 日付ユーティリティ
@@ -83,7 +84,9 @@ const App: React.FC = () => {
   // モーダル制御
   const [showEventForm, setShowEventForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ScheduleEvent | null>(null);
+  const [isCopyingEvent, setIsCopyingEvent] = useState(false);
   const [showStatusForm, setShowStatusForm] = useState(false);
+  const [showSettingsForm, setShowSettingsForm] = useState(false);
   const [defaultDate, setDefaultDate] = useState<string>('');
 
   // メモ保存タイマー
@@ -145,36 +148,51 @@ const App: React.FC = () => {
     setMonday(d);
   };
 
+  const handleDateSelect = (dateStr: string) => {
+    const d = new Date(dateStr);
+    setMonday(getMonday(d));
+  };
+
   // -----------------------------------------------------------------------
   // イベント操作
   // -----------------------------------------------------------------------
 
   const handleNewEvent = () => {
     setEditingEvent(null);
+    setIsCopyingEvent(false);
     setDefaultDate(toDateStr(new Date()));
     setShowEventForm(true);
   };
 
   const handleAddEventOnDate = (dateStr: string) => {
     setEditingEvent(null);
+    setIsCopyingEvent(false);
     setDefaultDate(dateStr);
     setShowEventForm(true);
   };
 
   const handleEditEvent = (event: ScheduleEvent) => {
     setEditingEvent(event);
+    setIsCopyingEvent(false);
+    setShowEventForm(true);
+  };
+
+  const handleCopyEvent = (event: ScheduleEvent) => {
+    setEditingEvent(event);
+    setIsCopyingEvent(true);
     setShowEventForm(true);
   };
 
   const handleSaveEvent = async (data: EventFormData, id?: number) => {
     try {
-      if (id) {
+      if (id && !isCopyingEvent) {
         await api.updateEvent(id, data);
       } else {
         await api.createEvent(data);
       }
       setShowEventForm(false);
       setEditingEvent(null);
+      setIsCopyingEvent(false);
       await loadData();
     } catch (err) {
       alert(err instanceof Error ? err.message : '保存に失敗しました');
@@ -274,7 +292,7 @@ const App: React.FC = () => {
     <div className="app" id="schedule-app">
       {/* ページ見出し */}
       <div className="app-header" id="app-header">
-        <h1 className="app-main-title">幹部職員スケジュール表</h1>
+        <h1 className="app-main-title">経理班スケジュール表</h1>
         {filterParticipantId && (
           <span className="filter-label">
             【{filterName} のスケジュール】
@@ -290,8 +308,10 @@ const App: React.FC = () => {
         onPrevWeek={goToPrevWeek}
         onThisWeek={goToThisWeek}
         onNextWeek={goToNextWeek}
+        onDateSelect={handleDateSelect}
         onNewEvent={handleNewEvent}
         onNewStatus={handleNewStatus}
+        onOpenSettings={() => setShowSettingsForm(true)}
       />
 
       {error && (
@@ -312,6 +332,7 @@ const App: React.FC = () => {
             events={filteredEvents}
             statuses={filteredStatuses}
             onEditEvent={handleEditEvent}
+            onCopyEvent={handleCopyEvent}
             onDeleteEvent={handleDeleteEvent}
             onDeleteStatus={handleDeleteStatus}
             onAddEvent={handleAddEventOnDate}
@@ -342,11 +363,13 @@ const App: React.FC = () => {
         <EventForm
           participants={participants}
           editingEvent={editingEvent}
+          isCopying={isCopyingEvent}
           defaultDate={defaultDate}
           onSave={handleSaveEvent}
           onClose={() => {
             setShowEventForm(false);
             setEditingEvent(null);
+            setIsCopyingEvent(false);
           }}
         />
       )}
@@ -361,9 +384,18 @@ const App: React.FC = () => {
         />
       )}
 
+      {/* 設定（人物編集）モーダル */}
+      {showSettingsForm && (
+        <SettingsModal
+          participants={participants}
+          onClose={() => setShowSettingsForm(false)}
+          onUpdate={loadData}
+        />
+      )}
+
       {/* 印刷用フッター */}
       <div className="print-footer">
-        幹部職員スケジュール表 — {getWeekLabel(monday)}
+        経理班スケジュール表 — {getWeekLabel(monday)}
         {filterParticipantId ? ` — ${filterName}` : ''}
       </div>
     </div>

@@ -11,6 +11,7 @@ interface WeekViewProps {
   events: ScheduleEvent[];
   statuses: ParticipantStatus[];
   onEditEvent: (event: ScheduleEvent) => void;
+  onCopyEvent: (event: ScheduleEvent) => void;
   onDeleteEvent: (id: number) => void;
   onDeleteStatus: (id: number) => void;
   onAddEvent: (dateStr: string) => void;
@@ -47,6 +48,7 @@ const WeekView: React.FC<WeekViewProps> = ({
   events,
   statuses,
   onEditEvent,
+  onCopyEvent,
   onDeleteEvent,
   onDeleteStatus,
   onAddEvent,
@@ -60,6 +62,7 @@ const WeekView: React.FC<WeekViewProps> = ({
           events={getEventsForDate(events, date)}
           statuses={getStatusesForDate(statuses, date)}
           onEditEvent={onEditEvent}
+          onCopyEvent={onCopyEvent}
           onDeleteEvent={onDeleteEvent}
           onDeleteStatus={onDeleteStatus}
           onAddEvent={onAddEvent}

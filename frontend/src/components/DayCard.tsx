@@ -13,6 +13,7 @@ interface DayCardProps {
   events: ScheduleEvent[];
   statuses: ParticipantStatus[];
   onEditEvent: (event: ScheduleEvent) => void;
+  onCopyEvent: (event: ScheduleEvent) => void;
   onDeleteEvent: (id: number) => void;
   onDeleteStatus: (id: number) => void;
   onAddEvent: (dateStr: string) => void;
@@ -50,6 +51,7 @@ const DayCard: React.FC<DayCardProps> = ({
   events,
   statuses,
   onEditEvent,
+  onCopyEvent,
   onDeleteEvent,
   onDeleteStatus,
   onAddEvent,
@@ -96,6 +98,7 @@ const DayCard: React.FC<DayCardProps> = ({
               key={ev.id}
               event={ev}
               onEdit={onEditEvent}
+              onCopy={onCopyEvent}
               onDelete={onDeleteEvent}
             />
           ))}

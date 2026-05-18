@@ -23,9 +23,13 @@ const statusColorClass = (s: string): string => {
 };
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, onDelete }) => {
+  const displayText = status.status === 'その他' && status.note
+    ? `その他（${status.note}）`
+    : status.status;
+
   return (
     <span className={`status-badge ${statusColorClass(status.status)}`}>
-      {status.participant_name}：{status.status}
+      {status.participant_name}：{displayText}
       {onDelete && (
         <button
           className="status-delete-btn"

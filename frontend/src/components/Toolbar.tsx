@@ -13,8 +13,10 @@ interface ToolbarProps {
   onPrevWeek: () => void;
   onThisWeek: () => void;
   onNextWeek: () => void;
+  onDateSelect: (date: string) => void;
   onNewEvent: () => void;
   onNewStatus: () => void;
+  onOpenSettings: () => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
@@ -25,8 +27,10 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onPrevWeek,
   onThisWeek,
   onNextWeek,
+  onDateSelect,
   onNewEvent,
   onNewStatus,
+  onOpenSettings,
 }) => {
   return (
     <div className="toolbar" id="main-toolbar">
@@ -40,6 +44,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
         <button className="btn btn-nav" onClick={onNextWeek} id="btn-next-week">
           次週 ▶
         </button>
+        <input
+          type="date"
+          className="nav-date-picker"
+          onChange={(e) => {
+            if (e.target.value) onDateSelect(e.target.value);
+          }}
+          title="指定日へジャンプ"
+        />
       </div>
 
       <h1 className="toolbar-title" id="week-label">{weekLabel}</h1>
@@ -73,6 +85,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
           id="btn-print"
         >
           🖨 印刷
+        </button>
+        <button
+          className="btn btn-nav"
+          onClick={onOpenSettings}
+          title="設定（人物編集）"
+          style={{ marginLeft: 'auto' }}
+        >
+          ⚙️ 設定
         </button>
       </div>
     </div>

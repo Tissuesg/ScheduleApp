@@ -24,6 +24,31 @@ export async function fetchParticipants(): Promise<Participant[]> {
   return res.json();
 }
 
+export async function createParticipant(data: { name: string; display_order: number }): Promise<Participant> {
+  const res = await fetch(`${BASE}/participants`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('参加者の登録に失敗しました');
+  return res.json();
+}
+
+export async function updateParticipant(id: number, data: { name: string; display_order: number }): Promise<Participant> {
+  const res = await fetch(`${BASE}/participants/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('参加者の更新に失敗しました');
+  return res.json();
+}
+
+export async function deleteParticipant(id: number): Promise<void> {
+  const res = await fetch(`${BASE}/participants/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('参加者の削除に失敗しました');
+}
+
 // ---------------------------------------------------------------------------
 // イベント
 // ---------------------------------------------------------------------------

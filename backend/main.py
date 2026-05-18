@@ -6,7 +6,7 @@
   uvicorn main:app --host 0.0.0.0 --port <新ポート番号>
   例: uvicorn main:app --host 0.0.0.0 --port 9000
 """
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Optional
 from contextlib import asynccontextmanager
 
@@ -29,6 +29,17 @@ class ParticipantOut(BaseModel):
     name: str
     display_order: int
     model_config = {"from_attributes": True}
+
+
+class ParticipantCreate(BaseModel):
+    name: str
+    display_order: int = 0
+
+
+class ParticipantUpdate(BaseModel):
+    name: str
+    display_order: int
+
 
 
 class EventCreate(BaseModel):
@@ -69,8 +80,10 @@ class EventOut(BaseModel):
 
 class StatusCreate(BaseModel):
     participant_id: int
-    target_date: str         # YYYY-MM-DD
-    status: str              # 年休, 出張, 病休, 午前休, 午後休
+    start_date: str          # YYYY-MM-DD
+    end_date: str            # YYYY-MM-DD
+    status: str              # 年休, 出張, 病休, 午前休, 午後休, 早退, その他
+    note: Optional[str] = None
 
 
 class StatusOut(BaseModel):
@@ -79,6 +92,7 @@ class StatusOut(BaseModel):
     participant_name: str = ""
     target_date: str
     status: str
+    note: Optional[str] = None
     model_config = {"from_attributes": True}
 
 
@@ -169,6 +183,37 @@ def event_to_out(ev: Event) -> EventOut:
 @app.get("/api/participants", response_model=list[ParticipantOut])
 def get_participants(db: Session = Depends(get_db)):
     return db.query(Participant).order_by(Participant.display_order).all()
+
+
+@app.post("/api/participants", response_model=ParticipantOut)
+def create_participant(data: ParticipantCreate, db: Session = Depends(get_db)):
+    p = Participant(name=data.name, display_order=data.display_order)
+    db.add(p)
+    db.commit()
+    db.refresh(p)
+    return p
+
+
+@app.put("/api/participants/{participant_id}", response_model=ParticipantOut)
+def update_participant(participant_id: int, data: ParticipantUpdate, db: Session = Depends(get_db)):
+    p = db.query(Participant).filter(Participant.id == participant_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="参加者が見つかりません")
+    p.name = data.name
+    p.display_order = data.display_order
+    db.commit()
+    db.refresh(p)
+    return p
+
+
+@app.delete("/api/participants/{participant_id}")
+def delete_participant(participant_id: int, db: Session = Depends(get_db)):
+    p = db.query(Participant).filter(Participant.id == participant_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="参加者が見つかりません")
+    db.delete(p)
+    db.commit()
+    return {"detail": "削除しました"}
 
 
 # ---------------------------------------------------------------------------
@@ -296,28 +341,49 @@ def get_status(start_date: str, end_date: str, db: Session = Depends(get_db)):
             participant_name=s.participant.name,
             target_date=fmt_date(s.target_date),
             status=s.status,
+            note=s.note,
         )
         for s in statuses
     ]
 
 
-@app.post("/api/status", response_model=StatusOut)
+@app.post("/api/status", response_model=list[StatusOut])
 def create_status(data: StatusCreate, db: Session = Depends(get_db)):
-    s = ParticipantStatus(
-        participant_id=data.participant_id,
-        target_date=date.fromisoformat(data.target_date),
-        status=data.status,
-    )
-    db.add(s)
+    start_d = date.fromisoformat(data.start_date)
+    end_d = date.fromisoformat(data.end_date)
+    delta = end_d - start_d
+    
+    if delta.days < 0:
+        raise HTTPException(status_code=400, detail="開始日は終了日以前である必要があります")
+
+    created_statuses = []
+    for i in range(delta.days + 1):
+        target_d = start_d + timedelta(days=i)
+        s = ParticipantStatus(
+            participant_id=data.participant_id,
+            target_date=target_d,
+            status=data.status,
+            note=data.note,
+        )
+        db.add(s)
+        created_statuses.append(s)
+        
     db.commit()
-    db.refresh(s)
-    return StatusOut(
-        id=s.id,
-        participant_id=s.participant_id,
-        participant_name=s.participant.name,
-        target_date=fmt_date(s.target_date),
-        status=s.status,
-    )
+    
+    result = []
+    for s in created_statuses:
+        db.refresh(s)
+        result.append(
+            StatusOut(
+                id=s.id,
+                participant_id=s.participant_id,
+                participant_name=s.participant.name,
+                target_date=fmt_date(s.target_date),
+                status=s.status,
+                note=s.note,
+            )
+        )
+    return result
 
 
 @app.delete("/api/status/{status_id}")

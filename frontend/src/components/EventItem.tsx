@@ -8,6 +8,7 @@ import type { ScheduleEvent } from '../types';
 interface EventItemProps {
   event: ScheduleEvent;
   onEdit: (event: ScheduleEvent) => void;
+  onCopy: (event: ScheduleEvent) => void;
   onDelete: (id: number) => void;
 }
 
@@ -30,7 +31,7 @@ function formatTime(ev: ScheduleEvent): string {
   return `${sh}:${sm}〜`;
 }
 
-const EventItem: React.FC<EventItemProps> = ({ event, onEdit, onDelete }) => {
+const EventItem: React.FC<EventItemProps> = ({ event, onEdit, onCopy, onDelete }) => {
   return (
     <div
       className={`event ${event.all_day ? 'event-allday' : ''}`}
@@ -40,6 +41,13 @@ const EventItem: React.FC<EventItemProps> = ({ event, onEdit, onDelete }) => {
         <span className="event-time">{formatTime(event)}</span>
         <span className="event-title">{event.title}</span>
         <div className="event-actions no-print">
+          <button
+            className="btn-icon"
+            onClick={() => onCopy(event)}
+            title="コピーして新規作成"
+          >
+            📋
+          </button>
           <button
             className="btn-icon"
             onClick={() => onEdit(event)}

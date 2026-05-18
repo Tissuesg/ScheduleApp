@@ -66,7 +66,8 @@ class ParticipantStatus(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     participant_id = Column(Integer, ForeignKey("participants.id"), nullable=False)
     target_date = Column(Date, nullable=False)
-    status = Column(Text, nullable=False)  # 年休, 出張, 病休, 午前休, 午後休
+    status = Column(Text, nullable=False)  # 年休, 出張, 病休, 午前休, 午後休, 早退, その他
+    note = Column(Text, nullable=True)     # 「その他」などの場合の自由記述メモ
 
     participant = relationship("Participant", back_populates="statuses")
 

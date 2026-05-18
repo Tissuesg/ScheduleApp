@@ -22,8 +22,10 @@ const StatusForm: React.FC<StatusFormProps> = ({
   const [participantId, setParticipantId] = useState<number>(
     participants[0]?.id || 0
   );
-  const [targetDate, setTargetDate] = useState(defaultDate || '');
+  const [startDate, setStartDate] = useState(defaultDate || '');
+  const [endDate, setEndDate] = useState(defaultDate || '');
   const [status, setStatus] = useState(STATUS_TYPES[0]);
+  const [note, setNote] = useState('');
 
   const selectRef = useRef<HTMLSelectElement>(null);
 
@@ -32,14 +34,20 @@ const StatusForm: React.FC<StatusFormProps> = ({
   }, []);
 
   const handleSubmit = () => {
-    if (!targetDate) {
-      alert('日付を選択してください');
+    if (!startDate || !endDate) {
+      alert('開始日と終了日を選択してください');
+      return;
+    }
+    if (startDate > endDate) {
+      alert('開始日は終了日以前である必要があります');
       return;
     }
     onSave({
       participant_id: participantId,
-      target_date: targetDate,
+      start_date: startDate,
+      end_date: endDate,
       status,
+      note: (status === 'その他' || status === '病休') ? note : undefined,
     });
   };
 
@@ -77,13 +85,25 @@ const StatusForm: React.FC<StatusFormProps> = ({
         </div>
 
         <div className="form-group">
-          <label>日付</label>
-          <input
-            type="date"
-            value={targetDate}
-            onChange={(e) => setTargetDate(e.target.value)}
-            id="input-status-date"
-          />
+          <label>期間</label>
+          <div className="form-row">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                if (endDate < e.target.value) setEndDate(e.target.value);
+              }}
+              id="input-status-start-date"
+            />
+            <span style={{ alignSelf: 'center' }}>〜</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              id="input-status-end-date"
+            />
+          </div>
         </div>
 
         <div className="form-group">
@@ -100,6 +120,19 @@ const StatusForm: React.FC<StatusFormProps> = ({
             ))}
           </select>
         </div>
+
+        { (status === 'その他' || status === '病休') && (
+          <div className="form-group">
+            <label>詳細内容</label>
+            <input
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="詳細（任意）"
+              id="input-status-note"
+            />
+          </div>
+        )}
 
         <div className="modal-actions">
           <button className="btn btn-primary" onClick={handleSubmit} id="btn-save-status">

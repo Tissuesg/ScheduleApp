@@ -172,6 +172,23 @@ body {
   font-size: 13px;
 }
 
+.nav-date-picker {
+  padding: 4px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+}
+
+.nav-date-picker:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
 .btn-icon {
   display: inline-flex;
   align-items: center;
@@ -561,6 +578,101 @@ body {
 
 .participant-checkbox {
   font-size: 13px;
+}
+
+/* =====================================================================
+   10.5. 設定画面（人物管理）
+   ===================================================================== */
+
+.participant-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.participant-list-item {
+  background: #fafafa;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.participant-view {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.participant-order {
+  font-size: 12px;
+  color: #6b7280;
+  width: 32px;
+  text-align: right;
+}
+
+.participant-name {
+  font-weight: 600;
+  flex: 1;
+}
+
+.participant-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.btn-text:hover {
+  text-decoration: underline;
+}
+
+.btn-danger {
+  color: #dc2626;
+}
+
+.participant-edit-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-input-name {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.edit-input-order {
+  width: 60px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.participant-add-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.add-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 /* =====================================================================

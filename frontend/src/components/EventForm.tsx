@@ -11,6 +11,7 @@ import type { Participant, ScheduleEvent, EventFormData } from '../types';
 interface EventFormProps {
   participants: Participant[];
   editingEvent: ScheduleEvent | null;  // null = 新規登録
+  isCopying?: boolean;                 // 既存イベントのコピーかどうか
   defaultDate?: string;                // YYYY-MM-DD（新規時のデフォルト日付）
   onSave: (data: EventFormData, id?: number) => void;
   onClose: () => void;
@@ -31,11 +32,12 @@ function toLocalInput(iso: string | null): string {
 const EventForm: React.FC<EventFormProps> = ({
   participants,
   editingEvent,
+  isCopying = false,
   defaultDate,
   onSave,
   onClose,
 }) => {
-  const isEdit = editingEvent !== null;
+  const isEdit = editingEvent !== null && !isCopying;
 
   const [title, setTitle] = useState('');
   const [startDt, setStartDt] = useState('');
@@ -115,7 +117,7 @@ const EventForm: React.FC<EventFormProps> = ({
         id="event-form-modal"
       >
         <h2 className="modal-title">
-          {isEdit ? '予定を編集' : '新規予定登録'}
+          {isEdit ? '予定を編集' : (isCopying ? '予定をコピーして新規登録' : '新規予定登録')}
         </h2>
 
         <div className="form-group">
