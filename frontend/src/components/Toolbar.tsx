@@ -3,13 +3,14 @@
  * 前週/今週/次週ナビ + 参加者フィルタ + 新規登録 + 休暇登録 + 印刷ボタン
  */
 import React from 'react';
-import type { Participant } from '../types';
+import type { Participant, Department } from '../types';
 
 interface ToolbarProps {
   weekLabel: string;
   participants: Participant[];
-  filterParticipantId: number | null;
-  onFilterChange: (id: number | null) => void;
+  departments: Department[];
+  filterKey: string;
+  onFilterChange: (key: string) => void;
   onPrevWeek: () => void;
   onThisWeek: () => void;
   onNextWeek: () => void;
@@ -22,7 +23,8 @@ interface ToolbarProps {
 const Toolbar: React.FC<ToolbarProps> = ({
   weekLabel,
   participants,
-  filterParticipantId,
+  departments,
+  filterKey,
   onFilterChange,
   onPrevWeek,
   onThisWeek,
@@ -59,19 +61,30 @@ const Toolbar: React.FC<ToolbarProps> = ({
       <div className="toolbar-actions">
         <select
           className="filter-select"
-          value={filterParticipantId ?? ''}
-          onChange={(e) =>
-            onFilterChange(e.target.value ? Number(e.target.value) : null)
-          }
+          value={filterKey}
+          onChange={(e) => onFilterChange(e.target.value)}
           id="filter-participant"
-          title="表示する人物を絞り込み"
+          title="表示する所属または人物を絞り込み"
         >
-          <option value="">全員表示</option>
-          {participants.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
+          <option value="all">全員表示</option>
+          {departments.length > 0 && (
+            <optgroup label="📂 所属で絞り込み">
+              {departments.map((d) => (
+                <option key={`dept-${d.id}`} value={`dept-${d.id}`}>
+                  {d.name}
+                </option>
+              ))}
+            </optgroup>
+          )}
+          {participants.length > 0 && (
+            <optgroup label="👥 人物で絞り込み">
+              {participants.map((p) => (
+                <option key={`part-${p.id}`} value={`part-${p.id}`}>
+                  {p.name}
+                </option>
+              ))}
+            </optgroup>
+          )}
         </select>
         <button className="btn btn-primary" onClick={onNewEvent} id="btn-new-event">
           ＋ 新規登録

@@ -10,6 +10,15 @@ from sqlalchemy.orm import relationship
 from database import Base
 
 
+class Department(Base):
+    """所属マスタ"""
+    __tablename__ = "departments"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(Text, nullable=False, unique=True)
+    display_order = Column(Integer, nullable=False, default=0)
+
+
 class Participant(Base):
     """参加者（幹部）マスタ"""
     __tablename__ = "participants"
@@ -17,8 +26,12 @@ class Participant(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(Text, nullable=False)
     display_order = Column(Integer, nullable=False, default=0)
+    department1_id = Column(Integer, ForeignKey("departments.id"), nullable=True)
+    department2_id = Column(Integer, ForeignKey("departments.id"), nullable=True)
 
     # リレーション
+    department1 = relationship("Department", foreign_keys=[department1_id])
+    department2 = relationship("Department", foreign_keys=[department2_id])
     event_links = relationship("EventParticipant", back_populates="participant")
     statuses = relationship("ParticipantStatus", back_populates="participant")
 

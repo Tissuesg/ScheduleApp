@@ -15,30 +15,56 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from sqlalchemy import text
 from database import engine, get_db, Base
-from models import Participant, Event, EventParticipant, ParticipantStatus, WeekMemo
-from seed import seed_participants
+from models import Participant, Event, EventParticipant, ParticipantStatus, WeekMemo, Department
+from seed import seed_participants, seed_departments
 
 
 # ---------------------------------------------------------------------------
 # Pydantic スキーマ
 # ---------------------------------------------------------------------------
 
-class ParticipantOut(BaseModel):
+class DepartmentOut(BaseModel):
     id: int
     name: str
     display_order: int
     model_config = {"from_attributes": True}
 
 
+class DepartmentCreate(BaseModel):
+    name: str
+    display_order: int = 0
+
+
+class DepartmentUpdate(BaseModel):
+    name: str
+    display_order: int
+
+
+class ParticipantOut(BaseModel):
+    id: int
+    name: str
+    display_order: int
+    department1_id: Optional[int] = None
+    department2_id: Optional[int] = None
+    department1: Optional[DepartmentOut] = None
+    department2: Optional[DepartmentOut] = None
+    model_config = {"from_attributes": True}
+
+
 class ParticipantCreate(BaseModel):
     name: str
     display_order: int = 0
+    department1_id: Optional[int] = None
+    department2_id: Optional[int] = None
 
 
 class ParticipantUpdate(BaseModel):
     name: str
     display_order: int
+    department1_id: Optional[int] = None
+    department2_id: Optional[int] = None
 
 
 
@@ -119,6 +145,24 @@ class WeekMemoOut(BaseModel):
 async def lifespan(app: FastAPI):
     # 起動時: テーブル作成 + シードデータ
     Base.metadata.create_all(bind=engine)
+    
+    # 既存の participants テーブルに所属カラムを追加（SQLiteの自動マイグレーション）
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE participants ADD COLUMN department1_id INTEGER REFERENCES departments(id)"))
+            conn.commit()
+            print("[migration] Added department1_id column to participants")
+        except Exception:
+            pass
+            
+        try:
+            conn.execute(text("ALTER TABLE participants ADD COLUMN department2_id INTEGER REFERENCES departments(id)"))
+            conn.commit()
+            print("[migration] Added department2_id column to participants")
+        except Exception:
+            pass
+
+    seed_departments()
     seed_participants()
     yield
 
@@ -177,6 +221,62 @@ def event_to_out(ev: Event) -> EventOut:
 
 
 # ---------------------------------------------------------------------------
+# API: 所属マスタ
+# ---------------------------------------------------------------------------
+
+@app.get("/api/departments", response_model=list[DepartmentOut])
+def get_departments(db: Session = Depends(get_db)):
+    return db.query(Department).order_by(Department.display_order).all()
+
+
+@app.post("/api/departments", response_model=DepartmentOut)
+def create_department(data: DepartmentCreate, db: Session = Depends(get_db)):
+    existing = db.query(Department).filter(Department.name == data.name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="同名の所属が既に登録されています")
+    d = Department(name=data.name, display_order=data.display_order)
+    db.add(d)
+    db.commit()
+    db.refresh(d)
+    return d
+
+
+@app.put("/api/departments/{department_id}", response_model=DepartmentOut)
+def update_department(department_id: int, data: DepartmentUpdate, db: Session = Depends(get_db)):
+    d = db.query(Department).filter(Department.id == department_id).first()
+    if not d:
+        raise HTTPException(status_code=404, detail="所属が見つかりません")
+    
+    existing = db.query(Department).filter(Department.name == data.name, Department.id != department_id).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="同名の所属が既に登録されています")
+        
+    d.name = data.name
+    d.display_order = data.display_order
+    db.commit()
+    db.refresh(d)
+    return d
+
+
+@app.delete("/api/departments/{department_id}")
+def delete_department(department_id: int, db: Session = Depends(get_db)):
+    d = db.query(Department).filter(Department.id == department_id).first()
+    if not d:
+        raise HTTPException(status_code=404, detail="所属が見つかりません")
+    
+    used_by = db.query(Participant).filter(
+        (Participant.department1_id == department_id) | 
+        (Participant.department2_id == department_id)
+    ).first()
+    if used_by:
+        raise HTTPException(status_code=400, detail="この所属はすでに人物に設定されているため削除できません")
+        
+    db.delete(d)
+    db.commit()
+    return {"detail": "削除しました"}
+
+
+# ---------------------------------------------------------------------------
 # API: 参加者マスタ
 # ---------------------------------------------------------------------------
 
@@ -187,7 +287,12 @@ def get_participants(db: Session = Depends(get_db)):
 
 @app.post("/api/participants", response_model=ParticipantOut)
 def create_participant(data: ParticipantCreate, db: Session = Depends(get_db)):
-    p = Participant(name=data.name, display_order=data.display_order)
+    p = Participant(
+        name=data.name,
+        display_order=data.display_order,
+        department1_id=data.department1_id,
+        department2_id=data.department2_id
+    )
     db.add(p)
     db.commit()
     db.refresh(p)
@@ -201,6 +306,8 @@ def update_participant(participant_id: int, data: ParticipantUpdate, db: Session
         raise HTTPException(status_code=404, detail="参加者が見つかりません")
     p.name = data.name
     p.display_order = data.display_order
+    p.department1_id = data.department1_id
+    p.department2_id = data.department2_id
     db.commit()
     db.refresh(p)
     return p

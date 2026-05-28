@@ -3,11 +3,22 @@
  * 仕様書 §7 DB設計 に対応
  */
 
+/** 所属マスタ */
+export interface Department {
+  id: number;
+  name: string;
+  display_order: number;
+}
+
 /** 参加者（幹部）マスタ */
 export interface Participant {
   id: number;
   name: string;
   display_order: number;
+  department1_id?: number | null;
+  department2_id?: number | null;
+  department1?: Department | null;
+  department2?: Department | null;
 }
 
 /** イベント参加者（レスポンス用） */

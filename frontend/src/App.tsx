@@ -10,7 +10,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import type {
   Participant, ScheduleEvent, ParticipantStatus,
-  EventFormData, StatusFormData, WeekMemo,
+  EventFormData, StatusFormData, WeekMemo, Department,
 } from './types';
 import * as api from './api';
 import Toolbar from './components/Toolbar';
@@ -70,6 +70,7 @@ const App: React.FC = () => {
   // 状態
   const [monday, setMonday] = useState<Date>(() => getMonday(new Date()));
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [statuses, setStatuses] = useState<ParticipantStatus[]>([]);
   const [weekMemo, setWeekMemo] = useState<WeekMemo | null>(null);
@@ -78,8 +79,8 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 参加者フィルタ
-  const [filterParticipantId, setFilterParticipantId] = useState<number | null>(null);
+  // 統合フィルタ ('all' | 'dept-${id}' | 'part-${id}')
+  const [filterKey, setFilterKey] = useState<string>('all');
 
   // モーダル制御
   const [showEventForm, setShowEventForm] = useState(false);
@@ -104,13 +105,15 @@ const App: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const [p, e, s, wm] = await Promise.all([
+      const [p, d, e, s, wm] = await Promise.all([
         api.fetchParticipants(),
+        api.fetchDepartments(),
         api.fetchEvents(startDate, endDate),
         api.fetchStatuses(startDate, endDate),
         api.fetchWeekMemo(startDate),
       ]);
       setParticipants(p);
+      setDepartments(d);
       setEvents(e);
       setStatuses(s);
       setWeekMemo(wm);
@@ -267,22 +270,50 @@ const App: React.FC = () => {
   };
 
   // -----------------------------------------------------------------------
-  // 参加者フィルタ
+  // 抽出フィルタおよび見出し・タブ連動
   // -----------------------------------------------------------------------
 
-  const filteredEvents = filterParticipantId
-    ? events.filter((ev) =>
-        ev.participants.some((p) => p.id === filterParticipantId)
-      )
-    : events;
+  const filterType = filterKey.split('-')[0];
+  const filterId = filterKey.split('-')[1] ? Number(filterKey.split('-')[1]) : null;
 
-  const filteredStatuses = filterParticipantId
-    ? statuses.filter((s) => s.participant_id === filterParticipantId)
-    : statuses;
+  // 選択されている所属または個人名
+  let filterName = '';
+  let filteredEvents = events;
+  let filteredStatuses = statuses;
 
-  const filterName = filterParticipantId
-    ? participants.find((p) => p.id === filterParticipantId)?.name || ''
-    : '';
+  if (filterType === 'dept' && filterId !== null) {
+    const dept = departments.find((d) => d.id === filterId);
+    filterName = dept ? dept.name : '';
+    // その所属に紐付く人物のID一覧
+    const memberIds = participants
+      .filter((p) => p.department1_id === filterId || p.department2_id === filterId)
+      .map((p) => p.id);
+    filteredEvents = events.filter((ev) =>
+      ev.participants.some((p) => memberIds.includes(p.id))
+    );
+    filteredStatuses = statuses.filter((s) => memberIds.includes(s.participant_id));
+  } else if (filterType === 'part' && filterId !== null) {
+    const part = participants.find((p) => p.id === filterId);
+    filterName = part ? part.name : '';
+    filteredEvents = events.filter((ev) =>
+      ev.participants.some((p) => p.id === filterId)
+    );
+    filteredStatuses = statuses.filter((s) => s.participant_id === filterId);
+  }
+
+  // タブタイトル (document.title) の動的制御
+  useEffect(() => {
+    if (filterKey === 'all') {
+      document.title = '週間予定表';
+    } else if (filterName) {
+      document.title = `${filterName}週間予定表`;
+    }
+  }, [filterKey, filterName]);
+
+  // ページメインタイトル
+  const mainTitle = filterKey === 'all'
+    ? 'スケジュール表'
+    : `${filterName}スケジュール表`;
 
   // -----------------------------------------------------------------------
   // レンダリング
@@ -292,8 +323,8 @@ const App: React.FC = () => {
     <div className="app" id="schedule-app">
       {/* ページ見出し */}
       <div className="app-header" id="app-header">
-        <h1 className="app-main-title">経理班スケジュール表</h1>
-        {filterParticipantId && (
+        <h1 className="app-main-title">{mainTitle}</h1>
+        {filterKey !== 'all' && (
           <span className="filter-label">
             【{filterName} のスケジュール】
           </span>
@@ -303,8 +334,9 @@ const App: React.FC = () => {
       <Toolbar
         weekLabel={getWeekLabel(monday)}
         participants={participants}
-        filterParticipantId={filterParticipantId}
-        onFilterChange={setFilterParticipantId}
+        departments={departments}
+        filterKey={filterKey}
+        onFilterChange={setFilterKey}
         onPrevWeek={goToPrevWeek}
         onThisWeek={goToThisWeek}
         onNextWeek={goToNextWeek}
@@ -388,6 +420,7 @@ const App: React.FC = () => {
       {showSettingsForm && (
         <SettingsModal
           participants={participants}
+          departments={departments}
           onClose={() => setShowSettingsForm(false)}
           onUpdate={loadData}
         />
@@ -395,8 +428,7 @@ const App: React.FC = () => {
 
       {/* 印刷用フッター */}
       <div className="print-footer">
-        経理班スケジュール表 — {getWeekLabel(monday)}
-        {filterParticipantId ? ` — ${filterName}` : ''}
+        {mainTitle} — {getWeekLabel(monday)}
       </div>
     </div>
   );

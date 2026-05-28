@@ -10,9 +10,54 @@ import type {
   StatusFormData,
   WeekMemo,
   WeekMemoUpdate,
+  Department,
 } from './types';
 
 const BASE = '/api';
+
+// ---------------------------------------------------------------------------
+// 所属
+// ---------------------------------------------------------------------------
+
+export async function fetchDepartments(): Promise<Department[]> {
+  const res = await fetch(`${BASE}/departments`);
+  if (!res.ok) throw new Error('所属マスタの取得に失敗しました');
+  return res.json();
+}
+
+export async function createDepartment(data: { name: string; display_order: number }): Promise<Department> {
+  const res = await fetch(`${BASE}/departments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || '所属の登録に失敗しました');
+  }
+  return res.json();
+}
+
+export async function updateDepartment(id: number, data: { name: string; display_order: number }): Promise<Department> {
+  const res = await fetch(`${BASE}/departments/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || '所属の更新に失敗しました');
+  }
+  return res.json();
+}
+
+export async function deleteDepartment(id: number): Promise<void> {
+  const res = await fetch(`${BASE}/departments/${id}`, { method: 'DELETE' });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || '所属の削除に失敗しました');
+  }
+}
 
 // ---------------------------------------------------------------------------
 // 参加者
@@ -24,7 +69,12 @@ export async function fetchParticipants(): Promise<Participant[]> {
   return res.json();
 }
 
-export async function createParticipant(data: { name: string; display_order: number }): Promise<Participant> {
+export async function createParticipant(data: {
+  name: string;
+  display_order: number;
+  department1_id?: number | null;
+  department2_id?: number | null;
+}): Promise<Participant> {
   const res = await fetch(`${BASE}/participants`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -34,7 +84,15 @@ export async function createParticipant(data: { name: string; display_order: num
   return res.json();
 }
 
-export async function updateParticipant(id: number, data: { name: string; display_order: number }): Promise<Participant> {
+export async function updateParticipant(
+  id: number,
+  data: {
+    name: string;
+    display_order: number;
+    department1_id?: number | null;
+    department2_id?: number | null;
+  }
+): Promise<Participant> {
   const res = await fetch(`${BASE}/participants/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

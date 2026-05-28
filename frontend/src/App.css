@@ -945,3 +945,137 @@ body {
     display: none !important;
   }
 }
+
+/* =====================================================================
+   14. 設定画面（アドバンスド・所属管理・タブ対応）
+   ===================================================================== */
+
+.settings-modal-content {
+  max-width: 640px !important; /* 横並びレイアウトのために少し広げる */
+}
+
+.settings-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b5563;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tab-btn:hover {
+  color: #2563eb;
+}
+
+.tab-btn.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.tab-panel {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dept-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 11px;
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  margin-left: 6px;
+  font-weight: 500;
+}
+
+.participant-depts-label {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.participant-edit-form-advanced,
+.participant-add-form-advanced {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px;
+  width: 100%;
+}
+
+.participant-edit-form-advanced .form-row,
+.participant-add-form-advanced .form-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.participant-edit-form-advanced .form-row input[type="text"],
+.participant-add-form-advanced .form-row input[type="text"] {
+  flex: 1;
+  min-width: 180px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+
+.order-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.order-input-wrapper input {
+  width: 70px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+
+.select-row {
+  display: flex;
+  gap: 16px !important;
+}
+
+.select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.select-wrapper select {
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #fff;
+  min-width: 120px;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-sm {
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+}
