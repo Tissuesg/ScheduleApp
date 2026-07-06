@@ -82,6 +82,15 @@ const EventForm: React.FC<EventFormProps> = ({
       return;
     }
 
+    if (!allDay && startDt && endDt) {
+      const startObj = new Date(startDt);
+      const endObj = new Date(endDt);
+      if (startObj > endObj) {
+        alert('⏰ 開始日時と終了日時の順序が正しくありません。\n開始日時は終了日時より前の時刻に設定してください。');
+        return;
+      }
+    }
+
     const data: EventFormData = {
       title: title.trim(),
       start_datetime: allDay

@@ -202,6 +202,11 @@ def fmt_date(d: date) -> str:
 
 def event_to_out(ev: Event) -> EventOut:
     """Event ORM → EventOut レスポンス"""
+    # 参加者を表示順 (display_order) 順にソートする
+    sorted_links = sorted(
+        ev.participant_links,
+        key=lambda link: link.participant.display_order if link.participant else 0
+    )
     return EventOut(
         id=ev.id,
         title=ev.title,
@@ -215,7 +220,7 @@ def event_to_out(ev: Event) -> EventOut:
         updated_by=ev.updated_by or "",
         participants=[
             EventParticipantOut(id=link.participant.id, name=link.participant.name)
-            for link in ev.participant_links
+            for link in sorted_links if link.participant
         ],
     )
 
